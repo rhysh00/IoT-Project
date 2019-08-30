@@ -1,0 +1,73 @@
+
+#include "pitches.h";
+
+
+const int ledPin =  3;// the number of the LED pin
+const int pinLight = A0; // Light sensor Pin Number
+
+int melody[] = {
+  NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4
+};
+
+// note durations: 4 = quarter note, 8 = eighth note, etc.:
+int noteDurations[] = {
+  4, 8, 8, 4, 4, 4, 4, 4
+};
+
+bool isThereLight()
+{
+  return (analogRead(pinLight)<50);
+}
+
+int ledState = LOW; // Sets LED to off
+          
+
+unsigned long previousMillis = 0;        // will store last time LED was updated
+
+
+const long interval = 1000;        
+
+void setup() {
+
+  Serial.begin(115200);
+
+  // set the digital pin as output:
+  pinMode(ledPin, OUTPUT);
+}
+
+void loop() {
+
+
+ if(!isThereLight())
+ {
+   for (int thisNote = 0; thisNote < 8; thisNote++) {
+
+    // to calculate the note duration, take one second divided by the note type.
+    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+    int noteDuration = 1000 / noteDurations[thisNote];
+    tone(8, melody[thisNote], noteDuration);
+    
+    int pauseBetweenNotes = noteDuration * 1.30;
+    delay(pauseBetweenNotes);
+    // stop the tone playing:
+    noTone(8);
+  }
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= interval) {
+   
+    previousMillis = currentMillis;
+
+    // if the LED is off turn it on and vice-versa:
+    if (ledState == LOW) {
+      ledState = HIGH;
+    } else {
+      ledState = LOW;
+    }
+
+    // set the LED with the ledState of the variable:
+    digitalWrite(ledPin, ledState);
+  }
+ 
+ }
+}
